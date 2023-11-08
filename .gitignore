@@ -1,0 +1,5 @@
+__pycache__/
+venv-metal/
+
+Miniforge3-Darwin-arm64.sh
+data/*.npy
