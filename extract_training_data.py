@@ -165,40 +165,58 @@ class FeatureExtractor(object):
         # initially, fill the vector with the index for "<NULL>"
         rep = np.full((6,), self.word_vocab["<NULL>"])
 
-        # first, stack
-        for i in range(1, min(4, 1 + len(state.stack))):
-            put_in_rep = None
-            tok_idx = state.stack[-i]
-            if tok_idx == 0:
-                put_in_rep = self.word_vocab["<ROOT>"]
-            elif words[tok_idx] in self.word_vocab:
-                # token on stack is a word
-                put_in_rep = self.word_vocab[words[tok_idx]]
-            elif pos[tok_idx] in self.pos_vocab:
-                # token on the stack is a POS tag
-                put_in_rep = self.pos_vocab[pos[tok_idx]]
+        for i in range(1, min(4, 1 + len(state.stack))):  # [1,2,3]
+            idx = state.stack[-i]
+            if words[idx] in self.word_vocab:
+                rep[i - 1] = self.word_vocab[words[idx]]
+            elif pos[idx] in self.pos_vocab:
+                rep[i - 1] = self.pos_vocab[pos[idx]]
 
-            rep[i - 1] = put_in_rep
+        for i in range(1, min(4, len(state.buffer))):
+            idx = state.buffer[-i]
+            if words[idx] in self.word_vocab:
+                rep[i + 2] = self.word_vocab[words[idx]]
+            elif pos[idx] in self.pos_vocab:
+                rep[i + 2] = self.pos_vocab[pos[idx]]
+        # # first, stack
+        # for i in range(1, min(4, 1 + len(state.stack))):
+        #     put_in_rep = None
+        #     tok_idx = state.stack[-i]
+        #     if tok_idx == 0:
+        #         put_in_rep = self.word_vocab["<ROOT>"]
+        #     elif words[tok_idx] in self.word_vocab:
+        #         # token on stack is a word
+        #         put_in_rep = self.word_vocab[words[tok_idx]]
+        #     elif pos[tok_idx] in self.pos_vocab:
+        #         # token on the stack is a POS tag
+        #         put_in_rep = self.pos_vocab[pos[tok_idx]]
 
-        # now, buffer
-        for i in range(1, min(4, 1 + len(state.buffer))):
-            put_in_rep = None
-            tok_idx = state.buffer[-i]
-            if tok_idx == 0:
-                put_in_rep = self.word_vocab["<ROOT>"]
-            elif words[tok_idx] in self.word_vocab:
-                put_in_rep = self.word_vocab[words[tok_idx]]
-            elif pos[tok_idx] in self.pos_vocab:
-                # token on the stack is a POS tag
-                put_in_rep = self.pos_vocab[pos[tok_idx]]
+        #     rep[i - 1] = put_in_rep
 
-            rep[-i] = put_in_rep
+        # # now, buffer
+        # for i in range(1, min(4, 1 + len(state.buffer))):
+        #     put_in_rep = None
+        #     tok_idx = state.buffer[-i]
+        #     if tok_idx == 0:
+        #         put_in_rep = self.word_vocab["<ROOT>"]
+        #     elif words[tok_idx] in self.word_vocab:
+        #         put_in_rep = self.word_vocab[words[tok_idx]]
+        #         # print(words[tok_idx], "is in words")
+        #     elif pos[tok_idx] in self.pos_vocab:
+        #         # token on the stack is a POS tag
+        #         put_in_rep = self.pos_vocab[pos[tok_idx]]
+        #         # print(pos[tok_idx], "is in pos")
 
+        #     rep[2 + i] = put_in_rep
+
+        # print(rep)
         return rep
 
     def get_output_representation(self, output_pair):
         # TODO: Write this method for Part 2
-        return np.zeros(91)
+        res = np.zeros(91)
+        res[self.output_labels[output_pair]] = 1
+        return res
 
 
 def get_training_matrices(extractor, in_file):
@@ -234,17 +252,17 @@ if __name__ == "__main__":
         )
         sys.exit(1)
 
-    # with open(sys.argv[1], "r") as in_file:
-    #     extractor = FeatureExtractor(word_vocab_f, pos_vocab_f)
-    #     print("Starting feature extraction... (each . represents 100 sentences)")
-    #     inputs, outputs = get_training_matrices(extractor, in_file)
-    #     print("Writing output...")
-    #     np.save(sys.argv[2], inputs)
-    #     np.save(sys.argv[3], outputs)
-    with open("data/train.conll", "r") as in_file:
+    with open(sys.argv[1], "r") as in_file:
         extractor = FeatureExtractor(word_vocab_f, pos_vocab_f)
         print("Starting feature extraction... (each . represents 100 sentences)")
         inputs, outputs = get_training_matrices(extractor, in_file)
         print("Writing output...")
-        np.save("data/input-train.npy", inputs)
-        np.save("data/target_train.npy", outputs)
+        np.save(sys.argv[2], inputs)
+        np.save(sys.argv[3], outputs)
+    # with open("test.conll", "r") as in_file:
+    #     extractor = FeatureExtractor(word_vocab_f, pos_vocab_f)
+    #     print("Starting feature extraction... (each . represents 100 sentences)")
+    #     inputs, outputs = get_training_matrices(extractor, in_file)
+    #     print("Writing output...")
+    #     np.save("data/input-train.npy", inputs)
+    #     np.save("data/target_train.npy", outputs)
