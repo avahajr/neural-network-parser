@@ -167,48 +167,21 @@ class FeatureExtractor(object):
 
         for i in range(1, min(4, 1 + len(state.stack))):  # [1,2,3]
             idx = state.stack[-i]
-            if words[idx] in self.word_vocab:
+            if words[idx] is None:
+                rep[i - 1] = self.word_vocab["<ROOT>"]
+            elif words[idx] in self.word_vocab:
                 rep[i - 1] = self.word_vocab[words[idx]]
             elif pos[idx] in self.pos_vocab:
                 rep[i - 1] = self.pos_vocab[pos[idx]]
 
-        for i in range(1, min(4, len(state.buffer))):
+        for i in range(1, min(4, 1 + len(state.buffer))):  # [1,2,3]
             idx = state.buffer[-i]
-            if words[idx] in self.word_vocab:
+            if words[idx] is None:
+                rep[i + 2] = self.word_vocab["<ROOT>"]
+            elif words[idx] in self.word_vocab:
                 rep[i + 2] = self.word_vocab[words[idx]]
             elif pos[idx] in self.pos_vocab:
                 rep[i + 2] = self.pos_vocab[pos[idx]]
-        # # first, stack
-        # for i in range(1, min(4, 1 + len(state.stack))):
-        #     put_in_rep = None
-        #     tok_idx = state.stack[-i]
-        #     if tok_idx == 0:
-        #         put_in_rep = self.word_vocab["<ROOT>"]
-        #     elif words[tok_idx] in self.word_vocab:
-        #         # token on stack is a word
-        #         put_in_rep = self.word_vocab[words[tok_idx]]
-        #     elif pos[tok_idx] in self.pos_vocab:
-        #         # token on the stack is a POS tag
-        #         put_in_rep = self.pos_vocab[pos[tok_idx]]
-
-        #     rep[i - 1] = put_in_rep
-
-        # # now, buffer
-        # for i in range(1, min(4, 1 + len(state.buffer))):
-        #     put_in_rep = None
-        #     tok_idx = state.buffer[-i]
-        #     if tok_idx == 0:
-        #         put_in_rep = self.word_vocab["<ROOT>"]
-        #     elif words[tok_idx] in self.word_vocab:
-        #         put_in_rep = self.word_vocab[words[tok_idx]]
-        #         # print(words[tok_idx], "is in words")
-        #     elif pos[tok_idx] in self.pos_vocab:
-        #         # token on the stack is a POS tag
-        #         put_in_rep = self.pos_vocab[pos[tok_idx]]
-        #         # print(pos[tok_idx], "is in pos")
-
-        #     rep[2 + i] = put_in_rep
-
         # print(rep)
         return rep
 
